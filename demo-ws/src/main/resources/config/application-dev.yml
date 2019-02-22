@@ -1,0 +1,10 @@
+custom:
+  cloud:
+    eureka:
+      service-url: http://admin:admin@39.96.85.178:8761/eureka
+  database:
+    path: 127.0.0.1:3306
+    name: demo-auth
+    params: autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true
+    username: root
+    password: root

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.auth.dao.mapper.UserInfoMapper">
+
+    <resultMap id="BaseResultMap" type="UserInfo">
+        <id property="id" column="id"/>
+        <result property="loginName" column="login_name"/>
+        <result property="userName" column="user_name"/>
+        <result property="password" column="password"/>
+        <result property="salt" column="salt"/>
+        <result property="deleted" column="deleted"/>
+        <result property="disabled" column="disabled"/>
+        <result property="remark" column="remark"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+    <sql id="table_name">
+        user_info
+    </sql>
+
+    <resultMap id="shiroUserInfoMap" type="ShiroUser">
+        <result property="loginName" column="login_name"/>
+        <result property="password" column="password"/>
+        <result property="salt" column="salt"/>
+        <collection property="shiroRoles" ofType="shiroRole">
+            <result property="roleName" column="role_name"/>
+            <result property="roleCode" column="role_code"/>
+        </collection>
+        <collection property="shiroPermissions" ofType="ShiroPermission">
+            <result property="menuName" column="menu_name"/>
+            <result property="menuCode" column="menu_code"/>
+            <result property="menuPath" column="menu_path"/>
+            <result property="menuType" column="menu_type"/>
+            <result property="parentId" column="parent_id"/>
+            <result property="sort" column="sort"/>
+            <result property="level" column="level"/>
+        </collection>
+    </resultMap>
+
+    <select id="getShiroUserInfo" resultMap="shiroUserInfoMap">
+        SELECT
+            ui.login_name,
+            ui.user_name,
+            ui.`password`,
+            ui.salt,
+            ri.role_name,
+            ri.role_code,
+            mi.menu_name,
+            mi.menu_code,
+            mi.menu_path,
+            mi.menu_type,
+            mi.parent_id,
+            mi.sort,
+            mi.`level`
+        FROM
+            user_info ui
+        LEFT JOIN user_role ur ON ui.id = ur.user_id AND ur.deleted = 1 AND ur.disabled = 1
+        LEFT JOIN role_info ri ON ri.id = ur.role_id AND ri.deleted = 1 AND ri.disabled = 1
+        LEFT JOIN role_menu rm ON ri.id = rm.role_id AND rm.deleted = 1 AND rm.disabled = 1
+        LEFT JOIN menu_info mi ON mi.id = rm.menu_id AND mi.deleted = 1 AND mi.disabled = 1
+        WHERE
+          ui.deleted = 1
+        AND ui.disabled = 1
+        AND ui.login_name = #{name};
+    </select>
+
+    <insert id="insert">
+        INSERT INTO <include refid="table_name"/>(login_name, user_name, password, salt)
+        VALUES(#{loginName}, #{userName}, #{password}, #{salt});
+    </insert>
+
+    <update id="update">
+        UPDATE <include refid="table_name"/>
+        <set>
+            <if test="loginName != null">
+                login_name = #{loginName},
+            </if>
+            <if test="userName != null">
+                user_name = #{userName},
+            </if>
+            <if test="password != null">
+                password = #{password},
+            </if>
+            <if test="salt != null">
+                salt = #{salt},
+            </if>
+            <if test="deleted != null">
+                deleted = #{deleted},
+            </if>
+            <if test="disabled != null">
+                disabled = #{disabled},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="getById" resultMap="BaseResultMap">
+        SELECT * FROM <include refid="table_name"/> WHERE id #{id}
+    </select>
+
+    <sql id="getUserInfoWhere">
+        <where>
+            <if test="loginName != null">
+                AND login_name LIKE CONCAT('%', #{loginName}, '%')
+            </if>
+            <if test="userName != null">
+                AND user_name LIKE CONCAT('%', #{userName}, '%')
+            </if>
+        </where>
+    </sql>
+
+    <select id="getUserInfoCount" resultType="long">
+        SELECT
+          COUNT(0)
+        FROM
+        <include refid="table_name"/>
+        <include refid="getUserInfoWhere"/>
+    </select>
+
+    <select id="getUserInfoList" resultMap="BaseResultMap">
+        SELECT
+          *
+        FROM
+        <include refid="table_name"/>
+        <include refid="getUserInfoWhere"/>
+        LIMIT #{pageSize} OFFSET #{offset};
+    </select>
+</mapper>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.auth.dao.mapper.MenuInfoMapper">
+    <resultMap id="BaseResultMap" type="MenuInfo">
+        <id property="id" column="id"/>
+        <result property="menuName" column="menu_name"/>
+        <result property="menuCode" column="menu_code"/>
+        <result property="menuPath" column="menu_path"/>
+        <result property="menuType" column="menu_type"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="sort" column="sort"/>
+        <result property="level" column="level"/>
+        <result property="deleted" column="deleted"/>
+        <result property="disabled" column="disabled"/>
+        <result property="remark" column="remark"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+    <sql id="table_name">
+        menu_info
+    </sql>
+
+    <resultMap id="MenuGradeInfoMap" type="MenuGradeInfo" extends="BaseResultMap">
+    </resultMap>
+
+    <select id="getMenuInfoAllList" resultMap="MenuGradeInfoMap">
+        SELECT * FROM <include refid="table_name" />;
+    </select>
+
+    <insert id="insert">
+        INSERT INTO <include refid="table_name"/>(menu_name, menu_code, menu_path, menu_type, parent_id, sort, `level`)
+        VALUES(#{menuName}, #{menuCode}, #{menuPath}, #{menuType}, #{parentId}, #{sort}, #{level});
+    </insert>
+
+    <update id="update">
+        UPDATE <include refid="table_name"/>
+        <set>
+            <if test="menuName != null">
+                menu_name = #{menuName},
+            </if>
+            <if test="menuCode != null">
+                menu_code = #{menuCode},
+            </if>
+            <if test="menuPath != null">
+                menu_path = #{menuPath},
+            </if>
+            <if test="menuType != null">
+                menu_type = #{menuType},
+            </if>
+            <if test="parentId != null">
+                parent_id = #{parentId},
+            </if>
+            <if test="sort != null">
+                sort = #{sort},
+            </if>
+            <if test="level != null">
+                `level` = #{level},
+            </if>
+            <if test="deleted != null">
+                deleted = #{deleted},
+            </if>
+            <if test="disabled != null">
+                disabled = #{disabled},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="getById" resultMap="BaseResultMap">
+        SELECT * FROM <include refid="table_name"/> WHERE id = #{id};
+    </select>
+
+</mapper>
